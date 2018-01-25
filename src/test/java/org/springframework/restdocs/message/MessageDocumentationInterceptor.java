@@ -40,14 +40,13 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 
 	public MessageDocumentationInterceptor with(MessageDocumentationConfigurer provider) {
 		this.provider = provider;
-		this.context = provider.getContext();
-		this.configuration.put(RestDocumentationContext.class.getName(),
-				this.context);
+		this.configuration.put(RestDocumentationContext.class.getName(), this.context);
 		return this;
 	}
 
 	public MessageDocumentationInterceptor inputs(MessageChannel input,
 			Snippet... snippets) {
+		this.context = null;
 		this.input = input;
 		this.inputs = snippets;
 		return this;
@@ -55,6 +54,7 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 
 	public MessageDocumentationInterceptor outputs(MessageChannel output,
 			Snippet... snippets) {
+		this.context = null;
 		this.output = output;
 		this.outputs = snippets;
 		return this;
@@ -74,17 +74,19 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 		else {
 			return message;
 		}
+		if (this.context == null) {
+			this.context = provider.getContext();
+		}
 		configurer.withAdditionalDefaults(MessageDocumentation.message());
 		configurer.apply(configuration, context);
 		provider.operationPreprocessors().apply(configuration, context);
 		provider.apply(configuration);
-		MessageDelivery<?> delivery = new MessageDelivery<>(channel.toString(),
-				message);
+		MessageDelivery<?> delivery = new MessageDelivery<>(channel.toString(), message);
 		configuration.put("delivery", delivery);
 		new RestDocumentationGenerator<>(
 				this.context.getTestMethodName() + "-" + channel.toString(),
-				requestConverter, responseConverter, snippets).handle(delivery,
-						delivery, configuration);
+				requestConverter, responseConverter, snippets).handle(delivery, delivery,
+						configuration);
 		return message;
 	}
 }

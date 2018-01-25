@@ -42,6 +42,7 @@ public class MessageOperationPreprocessorsConfigurer extends
 	@Override
 	public void apply(Map<String, Object> configuration,
 			RestDocumentationContext context) {
+		configuration.put(RestDocumentationContext.class.getName(), context);
 		super.apply(configuration, context);
 		logger.debug(configuration.get("delivery"));
 		logger.debug(context.getOutputDirectory());
