@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.demo;
+package org.springframework.restdocs.message;
 
 import java.util.Map;
 
@@ -22,27 +22,29 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.restdocs.RestDocumentationContext;
-import org.springframework.restdocs.config.SnippetConfigurer;
+import org.springframework.restdocs.config.OperationPreprocessorsConfigurer;
 
 /**
  * @author Dave Syer
  *
  */
-public class StreamSnippetConfigurer extends SnippetConfigurer<StreamDocumentationConfigurer, StreamSnippetConfigurer> {
-	
-	protected StreamSnippetConfigurer(StreamDocumentationConfigurer parent) {
+public class MessageOperationPreprocessorsConfigurer extends
+		OperationPreprocessorsConfigurer<MessageDocumentationConfigurer, MessageOperationPreprocessorsConfigurer> {
+
+	protected MessageOperationPreprocessorsConfigurer(
+			MessageDocumentationConfigurer parent) {
 		super(parent);
-		withDefaults();
 	}
 
-	private static final Log logger = LogFactory.getLog(StreamSnippetConfigurer.class);
+	private static final Log logger = LogFactory
+			.getLog(MessageOperationPreprocessorsConfigurer.class);
 
 	@Override
 	public void apply(Map<String, Object> configuration,
 			RestDocumentationContext context) {
 		super.apply(configuration, context);
-		logger.info(configuration);
-		logger.info(context.getOutputDirectory());
+		logger.debug(configuration.get("delivery"));
+		logger.debug(context.getOutputDirectory());
 	}
 
 }

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.example.demo;
+package org.springframework.restdocs.message;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.springframework.cloud.stream.converter.CompositeMessageConverterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.messaging.Message;
@@ -33,14 +34,16 @@ import org.springframework.restdocs.operation.RequestCookie;
  * @author Dave Syer
  *
  */
-public class MessageOperationRequest implements OperationRequest {
+class MessageOperationRequest implements OperationRequest {
 
 	private Message<?> request;
 	private String destination;
+	private final CompositeMessageConverterFactory factory;
 
 	public MessageOperationRequest(String destination, Message<?> request) {
 		this.destination = destination;
 		this.request = request;
+		this.factory = new CompositeMessageConverterFactory();
 	}
 
 	@Override
@@ -50,15 +53,13 @@ public class MessageOperationRequest implements OperationRequest {
 
 	@Override
 	public String getContentAsString() {
-		return request.getPayload().toString();
+		return MessageUtils.content(this.factory, this.request);
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (String key : request.getHeaders().keySet()) {
-			headers.set(key, request.getHeaders().toString());
-		}
+		HttpHeaders headers = MessageUtils.fromMessage(request.getHeaders(),
+				new HttpHeaders());
 		return headers;
 	}
 
@@ -80,7 +81,7 @@ public class MessageOperationRequest implements OperationRequest {
 	@Override
 	public URI getUri() {
 		try {
-			return new URI("to://message/" + destination);
+			return new URI("message://channel/" + destination);
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalStateException("Cannot create destination URI", e);

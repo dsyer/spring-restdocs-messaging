@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.example.demo;
+package org.springframework.restdocs.message;
 
+import org.springframework.cloud.stream.converter.CompositeMessageConverterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
@@ -25,12 +26,14 @@ import org.springframework.restdocs.operation.OperationResponse;
  * @author Dave Syer
  *
  */
-public class MessageOperationResponse implements OperationResponse {
+class MessageOperationResponse implements OperationResponse {
 
-	private Message<?> request;
+	private final Message<?> request;
+	private final CompositeMessageConverterFactory factory;
 
 	public MessageOperationResponse(Message<?> request) {
 		this.request = request;
+		this.factory = new CompositeMessageConverterFactory();
 	}
 
 	@Override
@@ -40,10 +43,7 @@ public class MessageOperationResponse implements OperationResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (String key : request.getHeaders().keySet()) {
-			headers.set(key, request.getHeaders().toString());
-		}
+		HttpHeaders headers = MessageUtils.fromMessage(request.getHeaders(), new HttpHeaders());
 		return headers;
 	}
 
@@ -54,7 +54,7 @@ public class MessageOperationResponse implements OperationResponse {
 
 	@Override
 	public String getContentAsString() {
-		return request.getPayload().toString();
+		return MessageUtils.content(this.factory, this.request);
 	}
 
 }

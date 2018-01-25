@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.demo;
+package org.springframework.restdocs.message;
 
 import org.springframework.restdocs.RestDocumentationContextProvider;
 
@@ -22,10 +22,14 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
  * @author Dave Syer
  *
  */
-public abstract class StreamDocumentation {
-	
-	public static StreamDocumentationConfigurer documentationConfiguration(RestDocumentationContextProvider provider) {
-		return new StreamDocumentationConfigurer(provider);
+public abstract class MessageDocumentation {
+
+	public static MessageDocumentationConfigurer documentationConfiguration(RestDocumentationContextProvider provider) {
+		return new MessageDocumentationConfigurer(provider);
+	}
+
+	public static MessageSnippet message() {
+		return new MessageSnippet();
 	}
 
 }

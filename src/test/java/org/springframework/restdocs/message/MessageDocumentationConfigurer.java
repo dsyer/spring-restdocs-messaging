@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.demo;
+package org.springframework.restdocs.message;
 
 import java.util.Map;
 
@@ -26,24 +26,24 @@ import org.springframework.restdocs.config.RestDocumentationConfigurer;
  * @author Dave Syer
  *
  */
-public class StreamDocumentationConfigurer extends
-		RestDocumentationConfigurer<StreamSnippetConfigurer, StreamOperationPreprocessorsConfigurer, StreamDocumentationConfigurer> {
+public class MessageDocumentationConfigurer extends
+		RestDocumentationConfigurer<MessageSnippetConfigurer, MessageOperationPreprocessorsConfigurer, MessageDocumentationConfigurer> {
 
 	private RestDocumentationContextProvider provider;
-	private StreamSnippetConfigurer snippets = new StreamSnippetConfigurer(this);
-	private StreamOperationPreprocessorsConfigurer preprocessors = new StreamOperationPreprocessorsConfigurer(this);
+	private MessageSnippetConfigurer snippets = new MessageSnippetConfigurer(this);
+	private MessageOperationPreprocessorsConfigurer preprocessors = new MessageOperationPreprocessorsConfigurer(this);
 
-	public StreamDocumentationConfigurer(RestDocumentationContextProvider provider) {
+	public MessageDocumentationConfigurer(RestDocumentationContextProvider provider) {
 		this.provider = provider;
 	}
 
 	@Override
-	public StreamSnippetConfigurer snippets() {
+	public MessageSnippetConfigurer snippets() {
 		return snippets;
 	}
 
 	@Override
-	public StreamOperationPreprocessorsConfigurer operationPreprocessors() {
+	public MessageOperationPreprocessorsConfigurer operationPreprocessors() {
 		return preprocessors;
 	}
 

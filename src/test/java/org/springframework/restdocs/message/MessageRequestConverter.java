@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.example.demo;
+package org.springframework.restdocs.message;
 
-import org.springframework.restdocs.operation.OperationResponse;
-import org.springframework.restdocs.operation.ResponseConverter;
+import org.springframework.restdocs.operation.OperationRequest;
+import org.springframework.restdocs.operation.RequestConverter;
 
 /**
  * @author Dave Syer
  *
  */
-public class MessageResponseConverter implements ResponseConverter<MessageDelivery<?>> {
+class MessageRequestConverter implements RequestConverter<MessageDelivery<?>> {
 
 	@Override
-	public OperationResponse convert(MessageDelivery<?> request) {
-		return new MessageOperationResponse(request.getMessage());
+	public OperationRequest convert(MessageDelivery<?> request) {
+		return new MessageOperationRequest(request.getDestination(), request.getMessage());
 	}
 
 }

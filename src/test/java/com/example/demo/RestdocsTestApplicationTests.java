@@ -1,7 +1,5 @@
 package com.example.demo;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -17,14 +15,12 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.config.GlobalChannelInterceptor;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.restdocs.JUnitRestDocumentation;
-import org.springframework.restdocs.RestDocumentationContext;
-import org.springframework.restdocs.generate.RestDocumentationGenerator;
+import org.springframework.restdocs.message.MessageDocumentation;
+import org.springframework.restdocs.message.MessageDocumentationInterceptor;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -46,20 +42,21 @@ public class RestdocsTestApplicationTests {
 	private MessageChannel output;
 
 	@Autowired
-	@Qualifier("testInterceptor")
-	private DocumentationInterceptor testInterceptor;
+	private MessageDocumentationInterceptor messages;
 
 	@Autowired
 	private MessageCollector collector;
 
 	@Before
 	public void setUp() {
-		testInterceptor.setProvider(
-				StreamDocumentation.documentationConfiguration(restDocumentation));
+		messages.with(MessageDocumentation.documentationConfiguration(restDocumentation))
+				.outputs(output);
 	}
 
 	@Test
 	public void contextLoads() throws Exception {
+		messages.inputs(input, PayloadDocumentation.requestFields(PayloadDocumentation
+				.fieldWithPath("value").description("The value of the Foo")));
 		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
 	}
@@ -70,45 +67,7 @@ public class RestdocsTestApplicationTests {
 		@Bean
 		@GlobalChannelInterceptor(patterns = "*")
 		public ChannelInterceptor testInterceptor() {
-			return new DocumentationInterceptor();
-		}
-	}
-
-	private static class DocumentationInterceptor extends ChannelInterceptorAdapter {
-		private StreamDocumentationConfigurer provider;
-		private Map<String, Object> configuration = new HashMap<>();
-		private RestDocumentationContext context;
-		private MessageRequestConverter requestConverter = new MessageRequestConverter();
-		private MessageResponseConverter responseConverter = new MessageResponseConverter();
-
-		public void setProvider(StreamDocumentationConfigurer provider) {
-			this.provider = provider;
-			this.context = provider.getContext();
-			this.configuration.put(RestDocumentationContext.class.getName(),
-					this.context);
-		}
-
-		@Override
-		public Message<?> preSend(Message<?> message, MessageChannel channel) {
-			StreamSnippetConfigurer snippets = provider.snippets();
-			if ("input".equals(channel.toString())) {
-				snippets.withDefaults();
-				snippets.withAdditionalDefaults(PayloadDocumentation.requestBody());
-			}
-			else if ("output".equals(channel.toString())) {
-				snippets.withDefaults();
-				snippets.withAdditionalDefaults(PayloadDocumentation.responseBody());
-			}
-			else {
-				return message;
-			}
-			snippets.apply(configuration, context);
-			provider.operationPreprocessors().apply(configuration, context);
-			provider.apply(configuration);
-			MessageDelivery<?> delivery = new MessageDelivery<>(channel.toString(), message);
-			new RestDocumentationGenerator<>(channel.toString(), requestConverter,
-					responseConverter).handle(delivery, delivery, configuration);
-			return message;
+			return new MessageDocumentationInterceptor();
 		}
 	}
 }

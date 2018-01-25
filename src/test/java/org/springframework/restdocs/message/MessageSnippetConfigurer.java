@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-package com.example.demo;
+package org.springframework.restdocs.message;
 
-import org.springframework.restdocs.operation.OperationRequest;
-import org.springframework.restdocs.operation.RequestConverter;
+import java.util.Map;
+
+import org.springframework.restdocs.RestDocumentationContext;
+import org.springframework.restdocs.config.SnippetConfigurer;
 
 /**
  * @author Dave Syer
  *
  */
-public class MessageRequestConverter implements RequestConverter<MessageDelivery<?>> {
+public class MessageSnippetConfigurer extends SnippetConfigurer<MessageDocumentationConfigurer, MessageSnippetConfigurer> {
+	
+	protected MessageSnippetConfigurer(MessageDocumentationConfigurer parent) {
+		super(parent);
+		withDefaults();
+	}
 
 	@Override
-	public OperationRequest convert(MessageDelivery<?> request) {
-		return new MessageOperationRequest(request.getDestination(), request.getMessage());
+	public void apply(Map<String, Object> configuration,
+			RestDocumentationContext context) {
+		super.apply(configuration, context);
 	}
 
 }
