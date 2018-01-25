@@ -1,0 +1,21 @@
+
+= Spring REST Docs Message Sample
+Dave Syer;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+
+Sample application demonstrating how to use Spring REST Docs with Spring Cloud Stream.
+
+`RestdocsTestApplicationTests` sends and receives a message twice. Two
+snippets are produced automatically for each interaction. One showing the input (e.g. for "foo"):
+
+include::{snippets}/foo-input/message.adoc[]
+
+and one the output:
+
+include::{snippets}/foo-output/message.adoc[]
+
+The "foo" test also documents the fields on the input message:
+
+include::{snippets}/foo-input/request-fields.adoc[]
