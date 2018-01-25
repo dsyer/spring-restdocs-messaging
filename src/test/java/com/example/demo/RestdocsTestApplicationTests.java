@@ -25,6 +25,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.RestDocumentationContext;
 import org.springframework.restdocs.generate.RestDocumentationGenerator;
+import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,22 +84,30 @@ public class RestdocsTestApplicationTests {
 		public void setProvider(StreamDocumentationConfigurer provider) {
 			this.provider = provider;
 			this.context = provider.getContext();
-			this.configuration.put(RestDocumentationContext.class.getName(), this.context);
+			this.configuration.put(RestDocumentationContext.class.getName(),
+					this.context);
 		}
 
 		@Override
 		public Message<?> preSend(Message<?> message, MessageChannel channel) {
-			System.err.println(channel);
-			System.err.println(message);
-			provider.snippets().apply(configuration, context);
+			StreamSnippetConfigurer snippets = provider.snippets();
+			if ("input".equals(channel.toString())) {
+				snippets.withDefaults();
+				snippets.withAdditionalDefaults(PayloadDocumentation.requestBody());
+			}
+			else if ("output".equals(channel.toString())) {
+				snippets.withDefaults();
+				snippets.withAdditionalDefaults(PayloadDocumentation.responseBody());
+			}
+			else {
+				return message;
+			}
+			snippets.apply(configuration, context);
 			provider.operationPreprocessors().apply(configuration, context);
-			provider.womp(configuration);
+			provider.apply(configuration);
+			MessageDelivery<?> delivery = new MessageDelivery<>(channel.toString(), message);
 			new RestDocumentationGenerator<>(channel.toString(), requestConverter,
-					responseConverter).handle(
-							new MessageDelivery(channel.toString(), message),
-							new MessageDelivery(channel.toString(), message),
-							configuration);
-			;
+					responseConverter).handle(delivery, delivery, configuration);
 			return message;
 		}
 	}

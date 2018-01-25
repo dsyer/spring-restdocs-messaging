@@ -32,6 +32,7 @@ public class StreamSnippetConfigurer extends SnippetConfigurer<StreamDocumentati
 	
 	protected StreamSnippetConfigurer(StreamDocumentationConfigurer parent) {
 		super(parent);
+		withDefaults();
 	}
 
 	private static final Log logger = LogFactory.getLog(StreamSnippetConfigurer.class);

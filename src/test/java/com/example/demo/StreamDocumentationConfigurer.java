@@ -21,7 +21,6 @@ import java.util.Map;
 import org.springframework.restdocs.RestDocumentationContext;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.config.RestDocumentationConfigurer;
-import org.springframework.restdocs.payload.PayloadDocumentation;
 
 /**
  * @author Dave Syer
@@ -31,7 +30,7 @@ public class StreamDocumentationConfigurer extends
 		RestDocumentationConfigurer<StreamSnippetConfigurer, StreamOperationPreprocessorsConfigurer, StreamDocumentationConfigurer> {
 
 	private RestDocumentationContextProvider provider;
-	private StreamSnippetConfigurer snippets = new StreamSnippetConfigurer(this).withDefaults(PayloadDocumentation.requestBody(), PayloadDocumentation.responseBody());
+	private StreamSnippetConfigurer snippets = new StreamSnippetConfigurer(this);
 	private StreamOperationPreprocessorsConfigurer preprocessors = new StreamOperationPreprocessorsConfigurer(this);
 
 	public StreamDocumentationConfigurer(RestDocumentationContextProvider provider) {
@@ -52,7 +51,7 @@ public class StreamDocumentationConfigurer extends
 		return provider.beforeOperation();
 	}
 	
-	public void womp(Map<String, Object> configuration) {
+	public void apply(Map<String, Object> configuration) {
 		super.apply(configuration, getContext());
 	}
 
