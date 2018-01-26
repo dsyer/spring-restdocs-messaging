@@ -19,7 +19,6 @@ package org.springframework.restdocs.message;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author Dave Syer
@@ -27,17 +26,9 @@ import org.springframework.util.ClassUtils;
  */
 public class MessageTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final String REST_DOCS_CLASS = "org.springframework.restdocs.message.MessageDocumentationInterceptor";
-
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
-		if (restDocsIsPresent()) {
-			new DocumentationHandler().afterTestMethod(testContext);
-		}
-	}
-
-	private boolean restDocsIsPresent() {
-		return ClassUtils.isPresent(REST_DOCS_CLASS, getClass().getClassLoader());
+		new DocumentationHandler().afterTestMethod(testContext);
 	}
 
 	private static class DocumentationHandler {
@@ -62,6 +53,5 @@ public class MessageTestExecutionListener extends AbstractTestExecutionListener 
 		}
 
 	}
-
 
 }
