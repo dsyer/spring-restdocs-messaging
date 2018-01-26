@@ -52,8 +52,6 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
-		MessageSnippetConfigurer configurer = provider.snippets();
-		configurer.withDefaults();
 		Snippet[] snippets;
 		String path;
 		if (channels.containsKey(channel)) {
@@ -65,7 +63,8 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 			return message;
 		}
 		provider.beforeOperation(configuration); // sets up context
-		configurer.withAdditionalDefaults(MessageDocumentation.message(path));
+		MessageSnippetConfigurer configurer = provider.snippets();
+		configurer.withDefaults(MessageDocumentation.message(path));
 		RestDocumentationContext context = (RestDocumentationContext) configuration
 				.get(CONTEXT_KEY);
 		configurer.apply(configuration, context);
