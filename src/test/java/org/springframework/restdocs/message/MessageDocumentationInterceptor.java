@@ -39,13 +39,13 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 		return this;
 	}
 
-	public void document(MessageChannel input, Snippet... snippets) {
-		document(input, "message", snippets);
+	public void document(MessageChannel channel, Snippet... snippets) {
+		document(channel, channel.toString() + "-" + "message", snippets);
 	}
 
-	public MessageDocumentationInterceptor document(MessageChannel input, String path,
+	public MessageDocumentationInterceptor document(MessageChannel channel, String path,
 			Snippet... snippets) {
-		channels.put(input, new MessageChannelConfiguration(input, path, snippets));
+		channels.put(channel, new MessageChannelConfiguration(path, snippets));
 		return this;
 	}
 
@@ -71,30 +71,22 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 		provider.operationPreprocessors().apply(configuration, context);
 		MessageDelivery<?> delivery = new MessageDelivery<>(channel.toString(), message);
 		configuration.put("delivery", delivery);
-		new RestDocumentationGenerator<>(
-				context.getTestMethodName() + "-" + channel.toString(), requestConverter,
+		new RestDocumentationGenerator<>(context.getTestMethodName(), requestConverter,
 				responseConverter, snippets).handle(delivery, delivery, configuration);
 		return message;
 	}
 
 	private static class MessageChannelConfiguration {
 		private Snippet[] snippets = new Snippet[0];
-		private MessageChannel channel;
 		private String path;
 
-		public MessageChannelConfiguration(MessageChannel channel, String path,
-				Snippet... snippets) {
-			this.channel = channel;
+		public MessageChannelConfiguration(String path, Snippet... snippets) {
 			this.path = path;
 			this.snippets = snippets;
 		}
 
 		public Snippet[] getSnippets() {
 			return this.snippets;
-		}
-
-		public MessageChannel getChannel() {
-			return this.channel;
 		}
 
 		public String getPath() {

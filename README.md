@@ -28,7 +28,7 @@ public class RestdocsTestApplicationTests {
 }
 ```
 
-Results in an Asciidoctor snippet in `target/generated-snippets/bar-input/message.adoc`:
+Results in an Asciidoctor snippet in `target/generated-snippets/bar/input-message.adoc`:
 
 ```
 [source,options="nowrap"]

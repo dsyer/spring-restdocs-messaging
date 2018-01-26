@@ -10,12 +10,12 @@ Sample application demonstrating how to use Spring REST Docs with Spring Cloud S
 `RestdocsTestApplicationTests` sends and receives a message twice. Two
 snippets are produced automatically for each interaction. One showing the input (e.g. for "foo"):
 
-include::{snippets}/foo-input/message.adoc[]
+include::{snippets}/foo/input-message.adoc[]
 
 and one the output:
 
-include::{snippets}/foo-output/message.adoc[]
+include::{snippets}/foo/output-message.adoc[]
 
 The "foo" test also documents the fields on the input message:
 
-include::{snippets}/foo-input/request-fields.adoc[]
+include::{snippets}/foo/request-fields.adoc[]

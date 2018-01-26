@@ -49,7 +49,7 @@ public class RestdocsTestApplicationTests {
 		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
 		String content = StreamUtils.copyToString(
-				new FileInputStream("target/generated-snippets/foo-input/message.adoc"),
+				new FileInputStream("target/generated-snippets/foo/input-message.adoc"),
 				Charset.forName("UTF-8"));
 		assertThat(content).contains("id:");
 		assertThat(content).contains("contentType: application/json");
@@ -64,7 +64,7 @@ public class RestdocsTestApplicationTests {
 		input.send(MessageBuilder.withPayload(new Foo("bar")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
 		String content = StreamUtils.copyToString(
-				new FileInputStream("target/generated-snippets/bar-output/output-3.adoc"),
+				new FileInputStream("target/generated-snippets/bar/output-3.adoc"),
 				Charset.forName("UTF-8"));
 		assertThat(content).contains("\"value\":\"bar1\"");
 	}

@@ -1,8 +1,0 @@
-[source,options="nowrap"]
-----
-id: ef471c45-886a-e4a5-a873-302660819c97
-contentType: application/json
-timestamp: 1516894809593
-
-{"value":"foo"}
-----
