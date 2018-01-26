@@ -1,27 +1,46 @@
 package com.example.demo;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Processor;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootApplication
 @EnableBinding(Processor.class)
 public class RestdocsTestApplication {
-	
-	@StreamListener(Processor.INPUT)
+
+	@Autowired
 	@Output(Processor.OUTPUT)
-	public Bar proces(Foo foo) {
-		return new Bar(foo.getValue());
+	private MessageChannel output;
+
+	@StreamListener(Processor.INPUT)
+	public void process(Foo foo) {
+		List<Bar> bars = new ArrayList<>();
+		if (foo.getValue().startsWith("bar")) {
+			for (int i = 0; i < 2; i++) {
+				bars.add(new Bar(foo.getValue() + i));
+			}
+		}
+		else {
+			bars.add(new Bar(foo.getValue()));
+		}
+		for (Bar bar : bars) {
+			output.send(MessageBuilder.withPayload(bar).build());
+		}
 	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(RestdocsTestApplication.class, args);
 	}
 }
-
 
 class Foo {
 

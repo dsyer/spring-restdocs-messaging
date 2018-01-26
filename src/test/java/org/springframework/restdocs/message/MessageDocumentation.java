@@ -32,4 +32,8 @@ public abstract class MessageDocumentation {
 		return new MessageSnippet();
 	}
 
+	public static MessageSnippet message(String path) {
+		return new MessageSnippet(path);
+	}
+
 }

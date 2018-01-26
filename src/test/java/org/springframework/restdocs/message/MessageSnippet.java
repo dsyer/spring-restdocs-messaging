@@ -40,8 +40,16 @@ public class MessageSnippet extends TemplatedSnippet {
 		this(new HashMap<>());
 	}
 
+	public MessageSnippet(String path) {
+		this(path, new HashMap<>());
+	}
+
 	public MessageSnippet(Map<String, Object> attributes) {
-		super("message", "message", attributes);
+		this("message-{step}", attributes);
+	}
+
+	public MessageSnippet(String path, Map<String, Object> attributes) {
+		super(path, "message", attributes);
 	}
 
 	@Override
@@ -52,7 +60,8 @@ public class MessageSnippet extends TemplatedSnippet {
 			Charset charset = extractCharset(contentType);
 			String body = charset != null ? new String(content, charset)
 					: new String(content);
-			MessageDelivery<?> delivery =  (MessageDelivery<?>) operation.getAttributes().get("delivery");
+			MessageDelivery<?> delivery = (MessageDelivery<?>) operation.getAttributes()
+					.get("delivery");
 			Map<String, Object> model = new HashMap<>();
 			model.put("headers", getHeaders(delivery.getMessage().getHeaders()));
 			model.put("payload", body);

@@ -20,7 +20,7 @@ public class RestdocsTestApplicationTests {
 
 	@Test
 	public void bar() throws Exception {
-		messages.inputs(input);
+		messages.document(input);
 		input.send(MessageBuilder.withPayload(new Foo("bar")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
 	}

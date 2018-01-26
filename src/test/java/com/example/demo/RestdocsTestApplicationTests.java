@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,15 +40,11 @@ public class RestdocsTestApplicationTests {
 
 	@Autowired
 	private MessageCollector collector;
-
-	@Before
-	public void setUp() {
-		messages.outputs(output);
-	}
-
+	
 	@Test
 	public void foo() throws Exception {
-		messages.inputs(input, PayloadDocumentation.requestFields(PayloadDocumentation
+		messages.document(output);
+		messages.document(input, PayloadDocumentation.requestFields(PayloadDocumentation
 				.fieldWithPath("value").description("The value of the Foo")));
 		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
@@ -64,12 +59,13 @@ public class RestdocsTestApplicationTests {
 
 	@Test
 	public void bar() throws Exception {
-		messages.inputs(input);
+		messages.document(input);
+		messages.document(output, "output-{step}");
 		input.send(MessageBuilder.withPayload(new Foo("bar")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
 		String content = StreamUtils.copyToString(
-				new FileInputStream("target/generated-snippets/bar-input/message.adoc"),
+				new FileInputStream("target/generated-snippets/bar-output/output-3.adoc"),
 				Charset.forName("UTF-8"));
-		assertThat(content).contains("\"value\":\"bar\"");
+		assertThat(content).contains("\"value\":\"bar1\"");
 	}
 }

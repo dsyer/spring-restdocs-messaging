@@ -18,7 +18,6 @@ package org.springframework.restdocs.message;
 
 import java.util.Map;
 
-import org.springframework.restdocs.RestDocumentationContext;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.config.RestDocumentationConfigurer;
 
@@ -46,13 +45,9 @@ public class MessageDocumentationConfigurer extends
 	public MessageOperationPreprocessorsConfigurer operationPreprocessors() {
 		return preprocessors;
 	}
-
-	public RestDocumentationContext getContext() {
-		return provider.beforeOperation();
-	}
 	
 	public void apply(Map<String, Object> configuration) {
-		super.apply(configuration, getContext());
+		super.apply(configuration, provider.beforeOperation());
 	}
 
 }
