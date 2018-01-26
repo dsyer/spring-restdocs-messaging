@@ -46,7 +46,7 @@ public class MessageDocumentationConfigurer extends
 		return preprocessors;
 	}
 	
-	public void apply(Map<String, Object> configuration) {
+	public void beforeOperation(Map<String, Object> configuration) {
 		super.apply(configuration, provider.beforeOperation());
 	}
 

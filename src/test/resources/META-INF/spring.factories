@@ -1,3 +1,5 @@
-# AutoConfigureRestDocs auto-configuration imports
 org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs=\
 org.springframework.restdocs.message.MessageRestDocsAutoConfiguration
+
+org.springframework.test.context.TestExecutionListener=\
+org.springframework.restdocs.message.MessageTestExecutionListener

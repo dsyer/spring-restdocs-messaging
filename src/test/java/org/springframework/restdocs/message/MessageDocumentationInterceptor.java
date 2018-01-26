@@ -28,6 +28,7 @@ import org.springframework.restdocs.snippet.Snippet;
 
 public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 
+	private static final String CONTEXT_KEY = RestDocumentationContext.class.getName();
 	private MessageDocumentationConfigurer provider;
 	private Map<String, Object> configuration = new HashMap<>();
 	private MessageRequestConverter requestConverter = new MessageRequestConverter();
@@ -63,10 +64,10 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 		else {
 			return message;
 		}
-		provider.apply(configuration); // sets up context
+		provider.beforeOperation(configuration); // sets up context
 		configurer.withAdditionalDefaults(MessageDocumentation.message(path));
 		RestDocumentationContext context = (RestDocumentationContext) configuration
-				.get(RestDocumentationContext.class.getName());
+				.get(CONTEXT_KEY);
 		configurer.apply(configuration, context);
 		provider.operationPreprocessors().apply(configuration, context);
 		MessageDelivery<?> delivery = new MessageDelivery<>(channel.toString(), message);
@@ -94,4 +95,10 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 		}
 
 	}
+
+	public void afterTest() {
+		configuration.clear();
+		channels.clear();
+	}
+
 }
