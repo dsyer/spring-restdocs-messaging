@@ -1,0 +1,23 @@
+label: {{label}}
+input:
+  messageFrom: {{request_destination}}
+  {{#request_body}}
+  messageBody: {{.}}
+  {{/request_body}}
+  {{#request_headers_present}}
+  messageHeaders:
+    {{#request_headers}}
+    {{key}}: {{value}}
+    {{/request_headers}}
+   {{/request_headers_present}}
+outputMessage:
+  sentTo: {{response_destination}}
+  {{#response_body}}
+  body: {{.}}
+  {{/response_body}}
+  {{#response_headers_present}}
+  headers:
+    {{#response_headers}}
+    {{key}}: {{value}}
+    {{/response_headers}}
+  {{/response_headers_present}}

@@ -24,9 +24,11 @@ import java.util.Collections;
 import org.springframework.cloud.stream.converter.CompositeMessageConverterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.restdocs.operation.OperationRequest;
 import org.springframework.restdocs.operation.OperationRequestPart;
+import org.springframework.restdocs.operation.OperationResponse;
 import org.springframework.restdocs.operation.Parameters;
 import org.springframework.restdocs.operation.RequestCookie;
 
@@ -34,16 +36,29 @@ import org.springframework.restdocs.operation.RequestCookie;
  * @author Dave Syer
  *
  */
-class MessageOperationRequest implements OperationRequest {
+class MessageOperation implements OperationRequest, OperationResponse {
 
-	private Message<?> request;
+	private Message<?> message;
 	private String destination;
 	private final CompositeMessageConverterFactory factory;
 
-	public MessageOperationRequest(String destination, Message<?> request) {
+	public MessageOperation(String destination, Message<?> request) {
 		this.destination = destination;
-		this.request = request;
+		this.message = request;
 		this.factory = new CompositeMessageConverterFactory();
+	}
+	
+	public String getDestination() {
+		return this.destination;
+	}
+	
+	public Message<?> getMessage() {
+		return this.message;
+	}
+
+	@Override
+	public HttpStatus getStatus() {
+		return HttpStatus.OK;
 	}
 
 	@Override
@@ -53,12 +68,12 @@ class MessageOperationRequest implements OperationRequest {
 
 	@Override
 	public String getContentAsString() {
-		return MessageUtils.content(this.factory, this.request);
+		return MessageUtils.content(this.factory, this.message);
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		HttpHeaders headers = MessageUtils.fromMessage(request.getHeaders(),
+		HttpHeaders headers = MessageUtils.fromMessage(message.getHeaders(),
 				new HttpHeaders());
 		return headers;
 	}

@@ -36,4 +36,8 @@ public abstract class MessageDocumentation {
 		return new MessageSnippet(path);
 	}
 
+	public static ContractExchangeSnippet yaml() {
+		return new ContractExchangeSnippet();
+	}
+
 }

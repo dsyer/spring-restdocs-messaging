@@ -16,7 +16,10 @@
 
 package org.springframework.restdocs.message;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
@@ -34,14 +37,61 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 	private MessageRequestConverter requestConverter = new MessageRequestConverter();
 	private MessageResponseConverter responseConverter = new MessageResponseConverter();
 	private Map<MessageChannel, MessageChannelConfiguration> channels = new HashMap<>();
+	private Map<MessageChannel, List<Message<?>>> messages = new LinkedHashMap<>();
 
 	public MessageDocumentationInterceptor with(MessageDocumentationConfigurer provider) {
 		this.provider = provider;
 		return this;
 	}
 
-	public void document(MessageChannel channel, Snippet... snippets) {
-		document(channel, channel.toString() + "-" + "message", snippets);
+	public MessageDocumentationInterceptor collect(MessageChannel... channels) {
+		for (MessageChannel channel : channels) {
+			messages.put(channel, new ArrayList<>());
+		}
+		return this;
+	}
+
+	public void document(Snippet... snippets) {
+		if (messages.isEmpty() || snippets.length == 0) {
+			return;
+		}
+		// Not really useful for anything in the snippets, so could replace with boolean
+		// flag
+		MessageDelivery<?> request = null;
+		MessageDelivery<?> response = null;
+		for (MessageChannel channel : messages.keySet()) {
+			if (!messages.get(channel).isEmpty()) {
+				if (request == null) {
+					request = new MessageDelivery<>(channel.toString(),
+							messages.get(channel).iterator().next());
+				}
+				else {
+					response = new MessageDelivery<>(channel.toString(),
+							messages.get(channel).iterator().next());
+				}
+			}
+		}
+		if (request == null && response == null) {
+			return;
+		}
+		if (response == null) {
+			response = request;
+		}
+		MessageSnippetConfigurer configurer = provider.snippets();
+		configurer.withDefaults(snippets);
+		provider.beforeOperation(configuration); // sets up context
+		RestDocumentationContext context = (RestDocumentationContext) configuration
+				.get(CONTEXT_KEY);
+		configurer.apply(configuration, context);
+		provider.operationPreprocessors().apply(configuration, context);
+		configuration.put("messages", messages);
+		new RestDocumentationGenerator<>(context.getTestMethodName(), requestConverter,
+				responseConverter, snippets).handle(request, response, configuration);
+	}
+
+	public MessageDocumentationInterceptor document(MessageChannel channel,
+			Snippet... snippets) {
+		return document(channel, channel.toString() + "-" + "message", snippets);
 	}
 
 	public MessageDocumentationInterceptor document(MessageChannel channel, String path,
@@ -54,6 +104,9 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		Snippet[] snippets;
 		String path;
+		if (messages.containsKey(channel)) {
+			messages.get(channel).add(message);
+		}
 		if (channels.containsKey(channel)) {
 			MessageChannelConfiguration config = channels.get(channel);
 			snippets = config.getSnippets();
@@ -98,6 +151,7 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 	public void afterTest() {
 		configuration.clear();
 		channels.clear();
+		messages.clear();
 	}
 
 }

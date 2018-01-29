@@ -27,7 +27,7 @@ class MessageResponseConverter implements ResponseConverter<MessageDelivery<?>> 
 
 	@Override
 	public OperationResponse convert(MessageDelivery<?> request) {
-		return new MessageOperationResponse(request.getMessage());
+		return new MessageOperation(request.getDestination(), request.getMessage());
 	}
 
 }

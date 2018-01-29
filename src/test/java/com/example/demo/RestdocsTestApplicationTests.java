@@ -15,6 +15,7 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.restdocs.message.MessageDocumentation;
 import org.springframework.restdocs.message.MessageDocumentationInterceptor;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,8 +47,10 @@ public class RestdocsTestApplicationTests {
 		messages.document(output);
 		messages.document(input, PayloadDocumentation.requestFields(PayloadDocumentation
 				.fieldWithPath("value").description("The value of the Foo")));
+		messages.collect(input, output);
 		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
+		messages.document(MessageDocumentation.yaml());
 		String content = StreamUtils.copyToString(
 				new FileInputStream("target/generated-snippets/foo/input-message.adoc"),
 				Charset.forName("UTF-8"));
@@ -55,6 +58,13 @@ public class RestdocsTestApplicationTests {
 		assertThat(content).contains("contentType: application/json");
 		assertThat(content).contains("timestamp:");
 		assertThat(content).contains("\"value\":\"foo\"");
+		String yaml = StreamUtils.copyToString(
+				new FileInputStream("target/generated-snippets/contracts/foo.yml"),
+				Charset.forName("UTF-8"));
+		assertThat(yaml).contains("input:");
+		assertThat(yaml).contains("messageBody:");
+		assertThat(yaml).contains("outputMessage:");
+		assertThat(yaml).contains("body:");
 	}
 
 	@Test

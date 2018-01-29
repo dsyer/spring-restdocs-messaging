@@ -37,10 +37,13 @@ public class MessageUtils {
 		HttpHeaders result = new HttpHeaders();
 		for (String name : headers.keySet()) {
 			Object value = headers.get(name);
-			if (MessageHeaders.ID.equals(name)) {
+			if (MessageHeaders.ID.equalsIgnoreCase(name)) {
 				continue;
 			}
-			if (MessageHeaders.CONTENT_TYPE.equals(name)) {
+			if (MessageHeaders.TIMESTAMP.equalsIgnoreCase(name)) {
+				continue;
+			}
+			if (MessageHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
 				name = HttpHeaders.CONTENT_TYPE;
 			}
 			name = name.toLowerCase();
@@ -80,7 +83,9 @@ public class MessageUtils {
 		Map<String, Object> map = new LinkedHashMap<>();
 		for (String name : headers.keySet()) {
 			Collection<?> values = multi(headers.get(name));
-			name = name.toLowerCase();
+			if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+				name = MessageHeaders.CONTENT_TYPE;
+			}
 			Object value = values == null ? null
 					: (values.size() == 1 ? values.iterator().next() : values);
 			map.put(name, value);
