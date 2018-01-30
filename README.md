@@ -1,6 +1,6 @@
 This project shows a proof of concept of how to use Spring RESTdocs with Spring Cloud Stream (the same techniques probably work equally well with Spring Integration).
 
-The basic idea is that tyou get a `MessageDocumentationInterceptor` that inspects all the messages flowing. It is also a RESTdocs configurer, so it has methods that accept `Snippets`. The default behaviour is to output the message headers and payload for an "input" and/or an "output" channel which are selected by the user. E.g.
+The basic idea is that you install a `MessageDocumentationInterceptor` that inspects all the messages flowing. There is also a RESTdocs configurer, so it has methods that accept `Snippets`. The default behaviour is to output the message headers and payload for an "input" and/or an "output" channel which are selected by the user. E.g.
 
 ```java
 @RunWith(SpringRunner.class)
@@ -13,7 +13,7 @@ public class RestdocsTestApplicationTests {
 	private MessageChannel input;
 
 	@Autowired
-	private MessageDocumentationInterceptor messages;
+	private MessageDocumentation messages;
 
 	@Autowired
 	private MessageCollector collector;
