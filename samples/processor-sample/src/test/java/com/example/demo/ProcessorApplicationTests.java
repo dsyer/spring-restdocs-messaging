@@ -45,7 +45,13 @@ public class ProcessorApplicationTests {
 		messages.document(output);
 		messages.document(input, PayloadDocumentation.requestFields(PayloadDocumentation
 				.fieldWithPath("value").description("The value of the Foo")));
-		messages.document(input, output);
+		messages.processor(input, output);
+	}
+
+	@Test
+	public void source() throws Exception {
+		output.send(MessageBuilder.withPayload(new Bar("bar")).build());
+		messages.source(output);
 	}
 
 }

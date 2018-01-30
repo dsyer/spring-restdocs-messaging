@@ -63,25 +63,35 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 	}
 
 	public void document(MessageChannel channel, String path, Snippet... snippets) {
-		document(channel, null, path, snippets);
+		generate(channel, null, path, new MessageSnippet(path), snippets);
 	}
 
-	public void document(MessageChannel input, MessageChannel output,
+	public void processor(MessageChannel input, MessageChannel output,
 			Snippet... snippets) {
-		document(input, output, "messages", snippets);
+		generate(input, output, "messages", new MessageContractYmlSnippet(), snippets);
 	}
 
-	public void document(MessageChannel input, MessageChannel output, String path,
-			Snippet... snippets) {
+	public void source(MessageChannel channel, Snippet... snippets) {
+		generate(null, channel, "messages", new MessageContractYmlSnippet(), snippets);
+	}
+
+	public void sink(MessageChannel channel, Snippet... snippets) {
+		generate(channel, null, "messages", new MessageContractYmlSnippet(), snippets);
+	}
+
+	private void generate(MessageChannel input, MessageChannel output, String path,
+			Snippet defaultSnippet, Snippet... snippets) {
 		if (messages.isEmpty()) {
 			return;
 		}
 		boolean single = true;
-		if (output != null) {
+		if (output != null && input != null) {
 			single = false;
 		}
-		for (Message<?> message : messages.get(input)) {
-			MessageDelivery<?> request = new MessageDelivery<>(input.toString(), message);
+		MessageChannel channel = input != null ? input : output;
+		for (Message<?> message : messages.get(channel)) {
+			MessageDelivery<?> request = new MessageDelivery<>(channel.toString(),
+					message);
 			MessageDelivery<?> response;
 			if (!single) {
 				response = new MessageDelivery<>(output.toString(),
@@ -91,24 +101,21 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 				response = request;
 			}
 			MessageSnippetConfigurer configurer = provider.snippets();
-			if (!single) {
-				configurer.withDefaults(new MessageContractYmlSnippet());
-			}
-			else {
-				configurer.withDefaults(new MessageSnippet(path));
-			}
+			configurer.withDefaults(defaultSnippet);
 			provider.beforeOperation(configuration); // sets up context
 			RestDocumentationContext context = (RestDocumentationContext) configuration
 					.get(CONTEXT_KEY);
 			configurer.apply(configuration, context);
 			provider.operationPreprocessors().apply(configuration, context);
 			configuration.put("messages", messages);
-			MessageDelivery<?> delivery = new MessageDelivery<>(input.toString(),
-					message);
-			configuration.put("delivery", delivery);
+			configuration.put("delivery", request);
+			if (single && output == null) {
+				configuration.put("sink", true);
+			}
 			new RestDocumentationGenerator<>(context.getTestMethodName(),
 					requestConverter, responseConverter, snippets).handle(request,
 							response, configuration);
+			configuration.remove("sink");
 			if (!single) {
 				return;
 			}

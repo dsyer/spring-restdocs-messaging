@@ -44,4 +44,10 @@ public class ConsumerApplicationTests {
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
 	}
 
+	@Test
+	public void simple() throws Exception {
+		assertThat(messages.trigger("source")).isTrue();
+		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
+	}
+
 }

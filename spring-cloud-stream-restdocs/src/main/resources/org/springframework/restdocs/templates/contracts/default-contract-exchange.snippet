@@ -1,4 +1,5 @@
 label: {{label}}
+{{#request_present}}
 input:
   messageFrom: {{request_destination}}
   {{#request_body}}
@@ -27,6 +28,8 @@ input:
     {{/request_header_matchers}}
     {{/request_header_matchers_present}}
   {{/request_matchers_present}}
+{{/request_present}}
+{{#response_present}}
 outputMessage:
   sentTo: {{response_destination}}
   {{#response_body}}
@@ -38,3 +41,4 @@ outputMessage:
     {{key}}: {{value}}
     {{/response_headers}}
   {{/response_headers_present}}
+{{/response_present}}

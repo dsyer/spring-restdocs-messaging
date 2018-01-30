@@ -107,9 +107,14 @@ public class MessageContractYmlSnippet implements Snippet {
 	}
 
 	private void insertResponseModel(Operation operation, Map<String, Object> model) {
-		if (!(operation.getResponse() instanceof MessageOperation)) {
-			return;
+		if (!(operation.getResponse() instanceof MessageOperation)
+				|| operation.getResponse().equals(operation.getRequest())) {
+			if (operation.getAttributes().containsKey("sink")) {
+				model.put("response_present", false);
+				return;
+			}
 		}
+		model.put("response_present", true);
 		MessageOperation response = (MessageOperation) operation.getResponse();
 		model.put("response_destination", response.getDestination());
 		if (response.getContent().length > 0) {
@@ -134,9 +139,14 @@ public class MessageContractYmlSnippet implements Snippet {
 	}
 
 	private void insertRequestModel(Operation operation, Map<String, Object> model) {
-		if (!(operation.getResponse() instanceof MessageOperation)) {
-			return;
+		if (!(operation.getResponse() instanceof MessageOperation)
+				|| operation.getResponse().equals(operation.getRequest())) {
+			if (!operation.getAttributes().containsKey("sink")) {
+				model.put("request_present", false);
+				return;
+			}
 		}
+		model.put("request_present", true);
 		MessageOperation request = (MessageOperation) operation.getRequest();
 		model.put("request_destination", request.getDestination());
 		if (request.getContent().length > 0) {
@@ -154,15 +164,16 @@ public class MessageContractYmlSnippet implements Snippet {
 				jsonPaths != null && !jsonPaths.isEmpty());
 		model.put("request_json_paths", jsonPaths(jsonPaths));
 		@SuppressWarnings("unchecked")
-		Map<String, String> headerMatchers = (Map<String, String>) operation.getAttributes()
-				.get("contract.headers");
+		Map<String, String> headerMatchers = (Map<String, String>) operation
+				.getAttributes().get("contract.headers");
 		model.put("request_header_matchers_present",
 				headerMatchers != null && !headerMatchers.isEmpty());
 		model.put("request_header_matchers", headerMatchers(headerMatchers));
 	}
 
-	private Set<Entry<String, String>> headerMatchers(Map<String, String> headerMatchers) {
-		return headerMatchers==null ? null : headerMatchers.entrySet();
+	private Set<Entry<String, String>> headerMatchers(
+			Map<String, String> headerMatchers) {
+		return headerMatchers == null ? null : headerMatchers.entrySet();
 	}
 
 	private void filterHeaders(Map<String, Object> headers) {

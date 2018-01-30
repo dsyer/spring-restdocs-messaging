@@ -108,4 +108,38 @@ class MessageOperation implements OperationRequest, OperationResponse {
 		return Collections.emptySet();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((this.destination == null) ? 0 : this.destination.hashCode());
+		result = prime * result + ((this.message.getHeaders().getId() == null) ? 0 : this.message.getHeaders().getId().hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MessageOperation other = (MessageOperation) obj;
+		if (this.destination == null) {
+			if (other.destination != null)
+				return false;
+		}
+		else if (!this.destination.equals(other.destination))
+			return false;
+		if (this.message == null) {
+			if (other.message != null)
+				return false;
+		}
+		else if (!this.message.getHeaders().getId().equals(other.message.getHeaders().getId()))
+			return false;
+		return true;
+	}
+
 }

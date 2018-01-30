@@ -52,7 +52,7 @@ public class RestdocsTestApplicationTests {
 	public void foo() throws Exception {
 		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
-		messages.document(input, output);
+		messages.processor(input, output);
 		messages.document(output);
 		messages.document(input, PayloadDocumentation.requestFields(PayloadDocumentation
 				.fieldWithPath("value").description("The value of the Foo")));
@@ -82,6 +82,30 @@ public class RestdocsTestApplicationTests {
 				new FileInputStream("target/generated-snippets/bar/output-3.adoc"),
 				Charset.forName("UTF-8"));
 		assertThat(content).contains("\"value\":\"bar1\"");
+	}
+
+	@Test
+	public void spam() throws Exception {
+		output.send(MessageBuilder.withPayload(new Bar("spam")).build());
+		messages.source(output);
+		String yaml = StreamUtils.copyToString(
+				new FileInputStream("target/generated-snippets/contracts/spam.yml"),
+				Charset.forName("UTF-8"));
+		assertThat(yaml).doesNotContain("input:");
+		assertThat(yaml).contains("outputMessage:");
+		assertThat(yaml).contains("\"value\":\"spam\"");
+	}
+
+	@Test
+	public void bucket() throws Exception {
+		input.send(MessageBuilder.withPayload(new Foo("bucket")).build());
+		messages.sink(input);
+		String yaml = StreamUtils.copyToString(
+				new FileInputStream("target/generated-snippets/contracts/bucket.yml"),
+				Charset.forName("UTF-8"));
+		assertThat(yaml).contains("input:");
+		assertThat(yaml).doesNotContain("outputMessage:");
+		assertThat(yaml).contains("\"value\":\"bucket\"");
 	}
 }
 
