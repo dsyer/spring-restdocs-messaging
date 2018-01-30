@@ -34,18 +34,18 @@ public class MessageTestExecutionListener extends AbstractTestExecutionListener 
 	private static class DocumentationHandler {
 
 		private void afterTestMethod(TestContext testContext) {
-			MessageDocumentationInterceptor restDocumentation = findMessageDocumentationInterceptor(
+			MessageDocumentation restDocumentation = findMessageDocumentation(
 					testContext);
 			if (restDocumentation != null) {
 				restDocumentation.afterTest();
 			}
 		}
 
-		private MessageDocumentationInterceptor findMessageDocumentationInterceptor(
+		private MessageDocumentation findMessageDocumentation(
 				TestContext testContext) {
 			try {
 				return testContext.getApplicationContext()
-						.getBean(MessageDocumentationInterceptor.class);
+						.getBean(MessageDocumentation.class);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				return null;

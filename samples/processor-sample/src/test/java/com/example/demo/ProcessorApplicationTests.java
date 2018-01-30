@@ -13,7 +13,7 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.restdocs.message.MessageDocumentationInterceptor;
+import org.springframework.restdocs.message.MessageDocumentation;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -33,7 +33,7 @@ public class ProcessorApplicationTests {
 	private MessageChannel output;
 
 	@Autowired
-	private MessageDocumentationInterceptor messages;
+	private MessageDocumentation messages;
 
 	@Autowired
 	private MessageCollector collector;

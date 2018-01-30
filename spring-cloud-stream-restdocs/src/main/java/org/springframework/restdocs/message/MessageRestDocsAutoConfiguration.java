@@ -19,7 +19,6 @@ package org.springframework.restdocs.message;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.config.GlobalChannelInterceptor;
-import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 
 /**
@@ -31,8 +30,16 @@ public class MessageRestDocsAutoConfiguration {
 
 	@Bean
 	@GlobalChannelInterceptor(patterns = "*")
-	public ChannelInterceptor testInterceptor(RestDocumentationContextProvider restDocumentation) {
-		return new MessageDocumentationInterceptor().with(MessageDocumentation.documentationConfiguration(restDocumentation));
+	public MessageDocumentationInterceptor testMessageInterceptor() {
+		return new MessageDocumentationInterceptor();
+	}
+
+	@Bean
+	public MessageDocumentation messageDocumentation(
+			MessageDocumentationInterceptor interceptor,
+			RestDocumentationContextProvider restDocumentation) {
+		return new MessageDocumentation(interceptor,
+				new MessageDocumentationConfigurer(restDocumentation));
 	}
 
 }
