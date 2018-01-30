@@ -13,7 +13,6 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.restdocs.message.MessageDocumentation;
 import org.springframework.restdocs.message.MessageDocumentationInterceptor;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -38,16 +37,15 @@ public class ProcessorApplicationTests {
 
 	@Autowired
 	private MessageCollector collector;
-	
+
 	@Test
 	public void processor() throws Exception {
+		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
+		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
 		messages.document(output);
 		messages.document(input, PayloadDocumentation.requestFields(PayloadDocumentation
 				.fieldWithPath("value").description("The value of the Foo")));
-		messages.collect(input, output);
-		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
-		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
-		messages.document(MessageDocumentation.contract());
+		messages.document(input, output);
 	}
 
 }

@@ -36,8 +36,8 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 	private Map<String, Object> configuration = new HashMap<>();
 	private MessageRequestConverter requestConverter = new MessageRequestConverter();
 	private MessageResponseConverter responseConverter = new MessageResponseConverter();
-	private Map<MessageChannel, MessageChannelConfiguration> channels = new HashMap<>();
 	private Map<MessageChannel, List<Message<?>>> messages = new LinkedHashMap<>();
+	private boolean collectAll = true;
 
 	public MessageDocumentationInterceptor with(MessageDocumentationConfigurer provider) {
 		this.provider = provider;
@@ -48,107 +48,83 @@ public class MessageDocumentationInterceptor extends ChannelInterceptorAdapter {
 		for (MessageChannel channel : channels) {
 			messages.put(channel, new ArrayList<>());
 		}
+		this.collectAll = false;
 		return this;
 	}
 
 	public void document(Snippet... snippets) {
-		if (messages.isEmpty() || snippets.length == 0) {
+		for (MessageChannel channel : messages.keySet()) {
+			document(channel, snippets);
+		}
+	}
+
+	public void document(MessageChannel channel, Snippet... snippets) {
+		document(channel, channel.toString() + "-" + "message", snippets);
+	}
+
+	public void document(MessageChannel channel, String path, Snippet... snippets) {
+		document(channel, null, path, snippets);
+	}
+
+	public void document(MessageChannel input, MessageChannel output,
+			Snippet... snippets) {
+		document(input, output, "messages", snippets);
+	}
+
+	public void document(MessageChannel input, MessageChannel output, String path,
+			Snippet... snippets) {
+		if (messages.isEmpty()) {
 			return;
 		}
-		MessageDelivery<?> request = null;
-		MessageDelivery<?> response = null;
-		for (MessageChannel channel : messages.keySet()) {
-			if (!messages.get(channel).isEmpty()) {
-				if (request == null) {
-					request = new MessageDelivery<>(channel.toString(),
-							messages.get(channel).iterator().next());
-				}
-				else {
-					response = new MessageDelivery<>(channel.toString(),
-							messages.get(channel).iterator().next());
-				}
+		boolean single = true;
+		if (output != null) {
+			single = false;
+		}
+		for (Message<?> message : messages.get(input)) {
+			MessageDelivery<?> request = new MessageDelivery<>(input.toString(), message);
+			MessageDelivery<?> response;
+			if (!single) {
+				response = new MessageDelivery<>(output.toString(),
+						messages.get(output).iterator().next());
+			}
+			else {
+				response = request;
+			}
+			MessageSnippetConfigurer configurer = provider.snippets();
+			if (!single) {
+				configurer.withDefaults(new MessageContractYmlSnippet());
+			}
+			else {
+				configurer.withDefaults(new MessageSnippet(path));
+			}
+			provider.beforeOperation(configuration); // sets up context
+			RestDocumentationContext context = (RestDocumentationContext) configuration
+					.get(CONTEXT_KEY);
+			configurer.apply(configuration, context);
+			provider.operationPreprocessors().apply(configuration, context);
+			configuration.put("messages", messages);
+			MessageDelivery<?> delivery = new MessageDelivery<>(input.toString(),
+					message);
+			configuration.put("delivery", delivery);
+			new RestDocumentationGenerator<>(context.getTestMethodName(),
+					requestConverter, responseConverter, snippets).handle(request,
+							response, configuration);
+			if (!single) {
+				return;
 			}
 		}
-		if (request == null && response == null) {
-			return;
-		}
-		if (response == null) {
-			response = request;
-		}
-		MessageSnippetConfigurer configurer = provider.snippets();
-		configurer.withDefaults(snippets);
-		provider.beforeOperation(configuration); // sets up context
-		RestDocumentationContext context = (RestDocumentationContext) configuration
-				.get(CONTEXT_KEY);
-		configurer.apply(configuration, context);
-		provider.operationPreprocessors().apply(configuration, context);
-		configuration.put("messages", messages);
-		new RestDocumentationGenerator<>(context.getTestMethodName(), requestConverter,
-				responseConverter, snippets).handle(request, response, configuration);
-	}
-
-	public MessageDocumentationInterceptor document(MessageChannel channel,
-			Snippet... snippets) {
-		return document(channel, channel.toString() + "-" + "message", snippets);
-	}
-
-	public MessageDocumentationInterceptor document(MessageChannel channel, String path,
-			Snippet... snippets) {
-		channels.put(channel, new MessageChannelConfiguration(path, snippets));
-		return this;
 	}
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
-		Snippet[] snippets;
-		String path;
-		if (messages.containsKey(channel)) {
-			messages.get(channel).add(message);
+		if (this.collectAll || messages.containsKey(channel)) {
+			messages.computeIfAbsent(channel, c -> new ArrayList<>()).add(message);
 		}
-		if (channels.containsKey(channel)) {
-			MessageChannelConfiguration config = channels.get(channel);
-			snippets = config.getSnippets();
-			path = config.getPath();
-		}
-		else {
-			return message;
-		}
-		provider.beforeOperation(configuration); // sets up context
-		MessageSnippetConfigurer configurer = provider.snippets();
-		configurer.withDefaults(MessageDocumentation.message(path));
-		RestDocumentationContext context = (RestDocumentationContext) configuration
-				.get(CONTEXT_KEY);
-		configurer.apply(configuration, context);
-		provider.operationPreprocessors().apply(configuration, context);
-		MessageDelivery<?> delivery = new MessageDelivery<>(channel.toString(), message);
-		configuration.put("delivery", delivery);
-		new RestDocumentationGenerator<>(context.getTestMethodName(), requestConverter,
-				responseConverter, snippets).handle(delivery, delivery, configuration);
 		return message;
-	}
-
-	private static class MessageChannelConfiguration {
-		private Snippet[] snippets = new Snippet[0];
-		private String path;
-
-		public MessageChannelConfiguration(String path, Snippet... snippets) {
-			this.path = path;
-			this.snippets = snippets;
-		}
-
-		public Snippet[] getSnippets() {
-			return this.snippets;
-		}
-
-		public String getPath() {
-			return this.path;
-		}
-
 	}
 
 	public void afterTest() {
 		configuration.clear();
-		channels.clear();
 		messages.clear();
 	}
 

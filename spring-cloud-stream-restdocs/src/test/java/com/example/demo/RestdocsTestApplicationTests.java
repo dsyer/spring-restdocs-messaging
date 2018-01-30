@@ -22,7 +22,6 @@ import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.restdocs.message.MessageDocumentation;
 import org.springframework.restdocs.message.MessageDocumentationInterceptor;
 import org.springframework.restdocs.payload.PayloadDocumentation;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -51,13 +50,12 @@ public class RestdocsTestApplicationTests {
 	
 	@Test
 	public void foo() throws Exception {
+		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
+		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
+		messages.document(input, output);
 		messages.document(output);
 		messages.document(input, PayloadDocumentation.requestFields(PayloadDocumentation
 				.fieldWithPath("value").description("The value of the Foo")));
-		messages.collect(input, output);
-		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
-		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
-		messages.document(MessageDocumentation.contract());
 		String content = StreamUtils.copyToString(
 				new FileInputStream("target/generated-snippets/foo/input-message.adoc"),
 				Charset.forName("UTF-8"));
@@ -76,10 +74,10 @@ public class RestdocsTestApplicationTests {
 
 	@Test
 	public void bar() throws Exception {
-		messages.document(input);
-		messages.document(output, "output-{step}");
 		input.send(MessageBuilder.withPayload(new Foo("bar")).build());
 		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
+		messages.document(input);
+		messages.document(output, "output-{step}");
 		String content = StreamUtils.copyToString(
 				new FileInputStream("target/generated-snippets/bar/output-3.adoc"),
 				Charset.forName("UTF-8"));

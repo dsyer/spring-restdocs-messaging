@@ -16,9 +16,6 @@
 
 package org.springframework.restdocs.message;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.messaging.Message;
 
 /**
@@ -28,11 +25,11 @@ import org.springframework.messaging.Message;
 class MessageDelivery<T> {
 
 	private final String destination;
-	private final List<Message<T>> messages = new ArrayList<>();
+	private final Message<T> message;
 
 	public MessageDelivery(String destination, Message<T> message) {
 		this.destination = destination;
-		this.messages.add(message);
+		this.message = message;
 	}
 
 	public String getDestination() {
@@ -40,17 +37,13 @@ class MessageDelivery<T> {
 	}
 
 	public Message<T> getMessage() {
-		return this.messages.isEmpty() ? null : this.messages.iterator().next();
-	}
-
-	public List<Message<T>> getMessages() {
-		return this.messages;
+		return this.message;
 	}
 
 	@Override
 	public String toString() {
-		return "MessageDelivery [destination=" + this.destination + ", messages="
-				+ this.messages + "]";
+		return "MessageDelivery [destination=" + this.destination + ", message="
+				+ this.message + "]";
 	}
 
 }
