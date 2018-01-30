@@ -1,0 +1,69 @@
+
+= Spring REST Docs Message Sample
+Dave Syer;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+
+Sample application demonstrating how to use Spring REST Docs with Spring Cloud Stream.
+
+`RestdocsTestApplicationTests` sends and receives a message. Two
+snippets are produced automatically for each interaction. One showing the input:
+
+include::{snippets}/processor/input-message.adoc[]
+
+and one the output:
+
+include::{snippets}/processor/output-message.adoc[]
+
+The "processor" test also documents the fields on the input message:
+
+include::{snippets}/processor/request-fields.adoc[]
+
+It also creates a YAML contract specification for the processor (an
+input message triggers an output message). This can be used by a
+consumer of the contract to test its own interaction with the
+processor. Here's an example (taken from the "consumer-sample" which
+is a sibling to the "processor-sample"):
+
+[source,java,indent=0]
+----
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureStubRunner(ids="com.example:processor-sample")              // <1>
+public class ConsumerApplicationTests {
+
+	@Autowired
+	@Qualifier(Processor.INPUT)
+	private MessageChannel input;
+
+	@Autowired
+	@Qualifier(Processor.OUTPUT)
+	private MessageChannel output;
+
+	@Autowired
+	private StubTrigger messages;                                         // <2>
+
+	@Autowired
+	private MessageCollector collector;                                   // <3>
+	
+	@Test
+	public void exchange() throws Exception {                             // <4>
+		assertThat(messages.trigger("processor")).isTrue();               
+		input.send(MessageBuilder.withPayload(new Foo("foo")).build());
+		assertThat(collector.forChannel(output).poll(1, TimeUnit.SECONDS)).isNotNull();
+	}
+
+}
+----
+<1> autoconfigure the "stub runner" for simulating messages from "processor-sample"
+<2> inject the `StubTrigger` from the Spring Cloud Contract stub runner
+<3> the `MessageCollector` is from Spring Cloud Stream - it allows us to collect messages from the output channel
+<4> a test method using the trigger and collector
+
+In the test method, we activate the "processor" trigger, which sets up
+the stub version of the "processor-sample" to expect an input
+message. We then send the input message, which causes the stub to send
+a message to the output channel. The consumer app uses
+`@EnableBinding(Processor.class)` as a convenience to set up the
+bindings to the two channels used by the processor.

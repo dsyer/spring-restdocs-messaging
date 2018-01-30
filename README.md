@@ -41,4 +41,4 @@ timestamp: 1516897094835
 ----
 ```
 
-You can add other snippets (e.g. to document fields in the message payload) using the public method in `MessageDocumentationInterceptor` before you send or receive any messages.
+You can add other snippets (e.g. to document fields in the message payload) using the public method in `MessageDocumentationInterceptor` before you send or receive any messages. A snippet is provided to record a message exchange (input-output) as a Spring Cloud Contract. The contract can then be used to construct a stub of the processor app that consumers (drivers) can use to do integration testing.

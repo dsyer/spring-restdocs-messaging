@@ -1,0 +1,40 @@
+label: {{label}}
+input:
+  messageFrom: {{request_destination}}
+  {{#request_body}}
+  messageBody: {{.}}
+  {{/request_body}}
+  {{#request_headers_present}}
+  messageHeaders:
+    {{#request_headers}}
+    {{key}}: {{value}}
+    {{/request_headers}}
+  {{/request_headers_present}}
+  {{#request_matchers_present}}
+  matchers:
+    {{#request_json_present}}
+    body:
+    {{#request_json}}
+      - path: {{jsonPath}}
+        type: by_equality
+    {{/request_json}}
+    {{/request_json_present}}
+    {{#request_header_matchers_present}}
+    headers:
+    {{#request_header_matchers}}
+      - key: {{key}}
+        regex: {{value}}
+    {{/request_header_matchers}}
+    {{/request_header_matchers_present}}
+  {{/request_matchers_present}}
+outputMessage:
+  sentTo: {{response_destination}}
+  {{#response_body}}
+  body: {{.}}
+  {{/response_body}}
+  {{#response_headers_present}}
+  headers:
+    {{#response_headers}}
+    {{key}}: {{value}}
+    {{/response_headers}}
+  {{/response_headers_present}}
