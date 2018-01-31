@@ -1,6 +1,6 @@
 This project shows a proof of concept of how to use Spring RESTdocs with Spring Cloud Stream (the same techniques probably work equally well with Spring Integration).
 
-The basic idea is that you install a `MessageDocumentationInterceptor` that inspects all the messages flowing. There is also a RESTdocs configurer, so it has methods that accept `Snippets`. The default behaviour is to output the message headers and payload for an "input" and/or an "output" channel which are selected by the user. E.g.
+The basic idea is that you install a `MessageDocumentationInterceptor` that inspects all the messages flowing. There is also a RESTdocs generator with methods that accept `Snippets`. The default behaviour is to output the message headers and payload for channels which are selected by the user. E.g.
 
 ```java
 @RunWith(SpringRunner.class)
@@ -41,4 +41,6 @@ timestamp: 1516897094835
 ----
 ```
 
-You can add other snippets (e.g. to document fields in the message payload) using the public method in `MessageDocumentationInterceptor` before you send or receive any messages. A snippet is provided to record a message exchange (input-output) as a Spring Cloud Contract. The contract can then be used to construct a stub of the processor app that consumers (drivers) can use to do integration testing.
+You can add other snippets (e.g. to document fields in the message payload) using the public method in `MessageDocumentation`.
+
+A snippet and public methods in `MessageDocumentation` are provided to record a stubs for messaging with Spring Cloud Contract. The contract can then be used to construct a stub of the app that consumers (drivers) can use to do integration testing. There is a sample showing the generation and use of such stubs.
